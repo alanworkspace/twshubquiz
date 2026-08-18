@@ -91,17 +91,21 @@ function QuizPage({ questions, onResult }) {
     }
   }, [current, animating])
 
-  const selectOption = useCallback(
+const selectOption = useCallback(
     (optionId) => {
       if (animating) return
-      const newAnswers = [...answers, optionId]
+      
+      // 修改點：根據當前題目索引 (current) 覆蓋答案，而不是盲目 push 附加在最後
+      const newAnswers = [...answers]
+      newAnswers[current] = optionId
       setAnswers(newAnswers)
+
       setDirection('next')
       setAnimating(true)
 
       setTimeout(() => {
         if (current + 1 < total) {
-          setCurrent((c) => c + 1)
+          setCurrent((c) => c - 1 >= 0 ? c + 1 : c + 1)
           setAnimating(false)
         } else {
           const counts = { A: 0, B: 0, C: 0 }
