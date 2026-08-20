@@ -13,11 +13,18 @@ function shuffleArray(array) {
 
 function LandingPage({ onStart }) {
   return (
-    <div className="min-h-screen bg-[#fbf9f5] flex flex-col items-center justify-center px-4 py-10">
-      {/* 1. 將 max-w-md 改為 max-w-4xl，並加入 md:flex-row 實現桌面端左右雙欄 */}
+    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 py-10 pt-20 md:pt-24">
+      <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
+        <img
+          src="/images/hkpa_logo.png"
+          alt="HKPA Logo"
+          className="h-10 md:h-14 w-auto object-contain"
+          onError={(e) => {
+            e.target.style.display = 'none'
+          }}
+        />
+      </div>
       <div className="w-full max-w-4xl flex flex-col md:flex-row items-center gap-8">
-        
-        {/* 左側：文字、角色標籤與開始按鈕 */}
         <div className="flex-[1.3] space-y-6 w-full">
           <div className="bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-6 md:p-8">
             <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3 whitespace-nowrap">
@@ -123,7 +130,17 @@ const selectOption = useCallback(
   const progress = ((current) / total) * 100
 
   return (
-    <div className="min-h-screen bg-[#fbf9f5] flex flex-col items-center px-4 py-6">
+    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 py-10 pt-20 md:pt-24">
+      <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
+        <img
+          src="/images/hkpa_logo.png"
+          alt="HKPA Logo"
+          className="h-10 md:h-14 w-auto object-contain"
+          onError={(e) => {
+            e.target.style.display = 'none'
+          }}
+        />
+      </div>
       <div className="w-full max-w-2xl">
         <div className="flex items-center justify-between mb-2">
           <button
@@ -204,7 +221,17 @@ function ResultPage({ winner, answers, onRestart }) {
   })
 
   return (
-    <div className="min-h-screen bg-[#fbf9f5] flex flex-col items-center justify-center px-4 py-10">
+    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 py-10 pt-20 md:pt-24">
+      <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
+        <img
+          src="/images/hkpa_logo.png"
+          alt="HKPA Logo"
+          className="h-10 md:h-14 w-auto object-contain"
+          onError={(e) => {
+            e.target.style.display = 'none'
+          }}
+        />
+      </div>
       <div className="w-full max-w-4xl flex flex-col md:flex-row items-stretch gap-6">
         
         {/* 左欄：整合在一起的彩色結果卡片 */}

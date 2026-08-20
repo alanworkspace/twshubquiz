@@ -14,7 +14,7 @@ const quizData = {
     subHint: "完全匿名 · 輕鬆玩",
     
     // 更新這裡的圖片路徑：
-    heroImage: "/images/homepage.jpeg",
+    heroImage: "/images/homepage.png",
     
     // 底部三個角色小卡片
     characters: [
@@ -145,7 +145,7 @@ const quizData = {
     C: {
       name: '呀山',
       title: '穩重派 · 呀山',
-      image: '/images/ABCD.png',
+      image: '/images/ISTJ.jpeg',
       color: 'bg-green-200',
       borderColor: 'border-green-400',
       shadowColor: 'shadow-green-300',
