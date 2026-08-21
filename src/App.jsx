@@ -328,7 +328,7 @@ function ResultPage({ winner, answers, onRestart }) {
               <img
                 src="/images/iglogo.png"
                 alt="Instagram Logo"
-                className="w-50 h-50 object-contain"
+                className="w-8 h-8 md:w-40 md:h-40 object-contain"
               />
 
             </a>
