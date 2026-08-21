@@ -221,7 +221,9 @@ function ResultPage({ winner, answers, onRestart }) {
   })
 
   return (
-    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 py-10 pt-20 md:pt-24">
+    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 pb-10 pt-20 md:pt-24">
+      
+      {/* 頂部 Logo */}
       <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
         <img
           src="/images/hkpa_logo.png"
@@ -232,89 +234,111 @@ function ResultPage({ winner, answers, onRestart }) {
           }}
         />
       </div>
-      <div className="w-full max-w-4xl flex flex-col md:flex-row items-stretch gap-6">
-        
-        {/* 左欄：整合在一起的彩色結果卡片 */}
-        <div className="w-full md:w-1/2 flex flex-col">
-          <div
-            className={`${result.color} border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-6 text-center h-full flex flex-col justify-between`}
-          >
-            <div>
-              <p className="text-sm font-bold text-slate-500 mb-1">你的測驗結果是</p>
-              <h1 className="text-2xl font-bold text-slate-800 mb-4">{result.title}</h1>
 
-              {/* 限制圖片最大高度，確保不撐開版面 */}
-              <div className="my-4 flex justify-center">
-                <img
-                  src={result.image}
-                  alt={result.name}
-                  className="max-h-48 object-contain"
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                  }}
-                />
+      <div className="w-full max-w-4xl flex flex-col gap-6">
+        
+        {/* 1. 上方：雙欄主要內容區域 (左欄 + 右欄) */}
+        <div className="w-full flex flex-col md:flex-row items-stretch gap-6">
+          
+          {/* 左欄：結果卡片 */}
+          <div className="w-full md:w-1/2 flex flex-col">
+            <div
+              className={`${result.color} border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-6 text-center h-full flex flex-col justify-between`}
+            >
+              <div>
+                <p className="text-sm font-bold text-slate-500 mb-1">你的測驗結果是</p>
+                <h1 className="text-2xl font-bold text-slate-800 mb-4">{result.title}</h1>
+
+                <div className="my-4 flex justify-center">
+                  <img
+                    src={result.image}
+                    alt={result.name}
+                    className="max-h-48 object-contain"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-700 leading-relaxed text-left mt-2">
+                {result.description}
+              </p>
+            </div>
+          </div>
+
+          {/* 右欄：性格特質 + 選擇分佈 + 再測一次按鈕 */}
+          <div className="w-full md:w-1/2 flex flex-col justify-between gap-4">
+            <div className="bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-5">
+              <p className="text-xs font-bold text-slate-500 mb-3">性格特質</p>
+              <div className="flex flex-wrap gap-2">
+                {result.traits.map((t) => (
+                  <span
+                    key={t}
+                    className="bg-white border-2 border-slate-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg px-3 py-1 text-sm font-bold text-slate-700"
+                  >
+                    {t}
+                  </span>
+                ))}
               </div>
             </div>
 
-            <p className="text-sm text-slate-700 leading-relaxed text-left mt-2">
-              {result.description}
-            </p>
+            <div className="bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-5">
+              <p className="text-xs font-bold text-slate-500 mb-3">選擇分佈</p>
+              {['A', 'B', 'C'].map((key) => {
+                const r = quizData.results[key]
+                const pct = total > 0 ? Math.round((counts[key] / total) * 100) : 0
+                return (
+                  <div key={key} className="mb-2 last:mb-0">
+                    <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                      <span>{r.name}</span>
+                      <span>{pct}%</span>
+                    </div>
+                    <div className="w-full h-4 bg-slate-100 border-2 border-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${r.color} transition-all duration-700 ease-out`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <button
+              onClick={onRestart}
+              className="w-full bg-white text-slate-800 font-bold text-lg py-3 rounded-xl border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer"
+            >
+              🔄 再測一次
+            </button>
           </div>
+
         </div>
 
-        {/* 右欄：性格特質 + 選擇分佈 + 按鈕 */}
-        <div className="w-full md:w-1/2 flex flex-col justify-between gap-4">
-          <div className="bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-5">
-            <p className="text-xs font-bold text-slate-500 mb-3">性格特質</p>
-            <div className="flex flex-wrap gap-2">
-              {result.traits.map((t) => (
-                <span
-                  key={t}
-                  className="bg-white border-2 border-slate-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg px-3 py-1 text-sm font-bold text-slate-700"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
+        {/* 2. 下方：跨滿全寬的 IG 追蹤區塊 */}
+        <div className="w-full bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
+          
+          <div className="flex items-center gap-4">
+            <a
+              href="https://www.instagram.com/hkpa_yaccms/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer"
+            >
+              <img
+                src="/images/iglogo.png"
+                alt="Instagram Logo"
+                className="w-50 h-50 object-contain"
+              />
 
-          <div className="bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-5">
-            <p className="text-xs font-bold text-slate-500 mb-3">選擇分佈</p>
-            {['A', 'B', 'C'].map((key) => {
-              const r = quizData.results[key]
-              const pct = total > 0 ? Math.round((counts[key] / total) * 100) : 0
-              return (
-                <div key={key} className="mb-2 last:mb-0">
-                  <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
-                    <span>
-                      {r.name}
-                    </span>
-                    <span>{pct}%</span>
-                  </div>
-                  <div className="w-full h-4 bg-slate-100 border-2 border-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${r.color} transition-all duration-700 ease-out`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              )
-            })}
+            </a>
           </div>
-
-          <button
-            onClick={onRestart}
-            className="w-full bg-white text-slate-800 font-bold text-lg py-3 rounded-xl border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer"
-          >
-            🔄 再測一次
-          </button>
         </div>
 
       </div>
     </div>
   )
 }
-
 export default function App() {
   const [phase, setPhase] = useState('landing')
   const [resultData, setResultData] = useState(null)
