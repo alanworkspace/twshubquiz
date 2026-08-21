@@ -316,7 +316,7 @@ function ResultPage({ winner, answers, onRestart }) {
         </div>
 
         {/* 2. 下方：跨滿全寬的 IG 追蹤區塊 */}
-        <div className="w-full bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="w-full bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-4 flex flex-col md:flex-row items-start justify-between gap-3">
           
           <div className="flex items-center gap-4">
             <a
@@ -328,7 +328,7 @@ function ResultPage({ winner, answers, onRestart }) {
               <img
                 src="/images/iglogo.png"
                 alt="Instagram Logo"
-                className="w-8 h-8 md:w-40 md:h-40 object-contain"
+                className="w-20 h-20 md:w-40 md:h-40 object-contain"
               />
 
             </a>
