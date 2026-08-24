@@ -35,7 +35,7 @@ function LandingPage({ onStart }) {
             </p>
           </div>
 
-          <div className="flex gap-3 justify-start overflow-x-auto pb-2">
+          <div className="grid grid-cols-3 gap-2 md:flex md:gap-3 w-full pb-2">
             {quizData.landing.characters.map((c) => (
               <div
                 key={c.id}
