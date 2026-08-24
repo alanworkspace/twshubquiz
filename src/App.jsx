@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import quizData from './data/quizData'
+const [userPercent, setUserPercent] = useState(null)
 
 function shuffleArray(array) {
   const shuffled = [...array]
@@ -225,7 +226,7 @@ const selectOption = useCallback(
   )
 }
 
-function ResultPage({ winner, answers, onRestart }) {
+function ResultPage({ winner, answers, percent, onRestart }) {
   const result = quizData.results[winner]
   const total = answers.length
   const counts = { A: 0, B: 0, C: 0 }
@@ -258,6 +259,16 @@ function ResultPage({ winner, answers, onRestart }) {
               <div>
                 <p className="text-sm font-bold text-slate-500 mb-1">你的測驗結果是</p>
                 <h1 className="text-2xl font-bold text-slate-800 mb-4 whitespace-pre-line">{result.title}</h1>
+
+                {percent !== null ? (
+                  <div className="inline-block bg-white/90 border border-slate-800 rounded-full px-3 py-1 text-xs font-bold text-slate-700 my-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    🎉 有 <span className="text-rose-500 font-extrabold">{percent}%</span> 人都係依個結果！
+                  </div>
+                ) : (
+                  <div className="text-xs text-slate-400 my-1 font-bold">正在計算全網同款人格比例...</div>
+                )}
+
+
 
                 <div className="my-4 flex justify-center">
                   <img
@@ -372,9 +383,27 @@ export default function App() {
   }, [])
 
   const handleResult = useCallback((winner, answers) => {
-    setResultData({ winner, answers })
-    setPhase('result')
-  }, [])
+  setResultData({ winner, answers })
+  setPhase('result')
+
+  // 抓取網址上的 source 標籤（預設為 public）
+  const urlParams = new URLSearchParams(window.location.search)
+  const sourceType = urlParams.get('source') || 'public'
+
+  // 發送資料給 Google Sheets 並取得百分比
+  fetch('https://script.google.com/macros/s/AKfycbxtpAId89am0-Wo1nnq0sg0bRVsCqkK3pptWzxuwuYYTJw58FrPXR22hLCZJZDix-TD/exec', { // 👈 貼上你剛複製的 Apps Script URL
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ winner, answers, sourceType })
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data && data.percent !== undefined) {
+        setUserPercent(data.percent) // 儲存回傳的百分比
+      }
+    })
+    .catch((err) => console.error('Error fetching stats:', err))
+}, [])
 
   const handleRestart = useCallback(() => {
     setResultData(null)
@@ -393,6 +422,7 @@ export default function App() {
     <ResultPage
       winner={resultData.winner}
       answers={resultData.answers}
+      percent={userPercent}
       onRestart={handleRestart}
     />
   )
