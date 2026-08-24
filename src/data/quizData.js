@@ -121,7 +121,7 @@ const quizData = {
 
   results: {
     A: {
-      name: '呀慈',
+      name: '呀慈 -「破冰者」',
       title: ' 呀慈 -「破冰者」',
       image: '/images/tsz.png',
       color: 'bg-pink-200',
@@ -132,7 +132,7 @@ const quizData = {
       traits: ['人間小太陽', '社交達人', '唔會冷場', '夜深怕孤單'],
     },
     B: {
-      name: '呀雲',
+      name: '呀雲 -「飄浮者」',
       title: '呀雲 -「飄浮者」',
       image: '/images/wan.png',
       color: 'bg-blue-200',
@@ -143,7 +143,7 @@ const quizData = {
       traits: ['靈魂出竅', '精神內耗', '隨便唔隨便', '溫柔飄過'],
     },
     C: {
-      name: '呀山',
+      name: '呀山 -「守護者」',
       title: '呀山 -「守護者」',
       image: '/images/shan.png',
       color: 'bg-green-200',
