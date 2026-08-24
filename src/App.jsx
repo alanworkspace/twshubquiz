@@ -106,7 +106,7 @@ const selectOption = useCallback(
       if (animating) return
 
       const newAnswers = [...answers]
-      newAnswers[current] = optionId
+      newAnswers[current] = { qId: question.id, ans: optionId }
       setAnswers(newAnswers)
 
       setDirection('next')
@@ -119,7 +119,8 @@ const selectOption = useCallback(
         } else {
           const counts = { A: 0, B: 0, C: 0 }
           newAnswers.forEach((a) => {
-            if (counts[a] !== undefined) counts[a] += 1
+            const choice = a.ans || a
+            if (counts[choice] !== undefined) counts[choice] += 1
           })
 
           const maxScore = Math.max(...Object.values(counts))
