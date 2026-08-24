@@ -46,7 +46,7 @@ function LandingPage({ onStart }) {
                   <img
                     src={c.image}
                     alt={c.name}
-                    className="w-18 h-18 object-contain"
+                    className="w-18 h-18 md:w-12 md:h-12 object-contain"
                   />
                 )}
               </div>
