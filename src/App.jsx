@@ -39,10 +39,16 @@ function LandingPage({ onStart }) {
             {quizData.landing.characters.map((c) => (
               <div
                 key={c.id}
-                className={`${c.color} border-2 border-slate-800 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-xl px-4 py-2 text-center shrink-0`}
+                className={`${c.color} border-2 border-slate-800 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-xl px-4 py-3 shrink-0 flex items-center justify-between gap-3`}
               >
-                <span className="text-2xl">{c.emoji}</span>
-                <p className="text-xs font-bold text-slate-700 mt-1">{c.name}</p>
+                <span className="text-m font-bold text-slate-700">{c.name}</span>
+                {c.image && (
+                  <img
+                    src={c.image}
+                    alt={c.name}
+                    className="w-18 h-18 object-contain"
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -117,10 +123,26 @@ const selectOption = useCallback(
         } else {
           const counts = { A: 0, B: 0, C: 0 }
           newAnswers.forEach((a) => {
-            counts[a] = (counts[a] || 0) + 1
+            if (counts[a] !== undefined) counts[a] += 1
           })
-          const winner = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
-          onResult(winner, newAnswers)
+
+          // 1. 找出最高得分是多少
+          const maxScore = Math.max(...Object.values(counts))
+
+          // 2. 找出所有達到最高分的選項（例如同分為 ['A', 'B']）
+          const topKeys = Object.keys(counts)
+            .filter((k) => counts[k] === maxScore)
+            .sort() // 確保順序是 A -> B -> C
+
+          // 3. 把最高分的字母拼起來，例如 'A', 'AB', 'AC', 'BC', 'ABC'
+          let winnerKey = topKeys.join('')
+
+          // 4. 安全保護：如果 quizData.results 裡面沒有定義這個組合，就退回第一個單一角色
+          if (!quizData.results[winnerKey]) {
+            winnerKey = topKeys[0]
+          }
+
+          onResult(winnerKey, newAnswers)
         }
       }, 300)
     },
@@ -247,7 +269,7 @@ function ResultPage({ winner, answers, onRestart }) {
             >
               <div>
                 <p className="text-sm font-bold text-slate-500 mb-1">你的測驗結果是</p>
-                <h1 className="text-2xl font-bold text-slate-800 mb-4">{result.title}</h1>
+                <h1 className="text-2xl font-bold text-slate-800 mb-4 whitespace-pre-line">{result.title}</h1>
 
                 <div className="my-4 flex justify-center">
                   <img
@@ -261,7 +283,7 @@ function ResultPage({ winner, answers, onRestart }) {
                 </div>
               </div>
 
-              <p className="text-sm text-slate-700 leading-relaxed text-left mt-2">
+              <p className="text-sm text-slate-700 leading-relaxed text-left mt-2 whitespace-pre-line">
                 {result.description}
               </p>
             </div>
@@ -326,7 +348,20 @@ function ResultPage({ winner, answers, onRestart }) {
               className="flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer"
             >
               <img
-                src="/images/iglogo.png"
+                src="/images/iglogo1.png"
+                alt="Instagram Logo"
+                className="w-20 h-20 md:w-40 md:h-40 object-contain"
+              />
+
+            </a>
+            <a
+              href="https://www.instagram.com/hkpa_tkyouth/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer"
+            >
+              <img
+                src="/images/iglogo2.png"
                 alt="Instagram Logo"
                 className="w-20 h-20 md:w-40 md:h-40 object-contain"
               />
