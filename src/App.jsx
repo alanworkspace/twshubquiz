@@ -264,7 +264,7 @@ function ResultPage({ winner, answers, percent, onRestart }) {
                     🎉 有 <span className="text-[#C85A32] font-extrabold text-base md:text-lg">{percent}%</span> 人都係依個結果！
                   </div>
                 ) : (
-                  <div className="text-sm text-slate-600 mt-0 mb-1 font-bold">正在計算全網同款人格比例...</div>
+                  <div className="text-sm text-slate-600 mt-0 mb-1 font-bold">正在計算結果...</div>
                 )}
 
 
