@@ -231,7 +231,10 @@ function ResultPage({ winner, answers, percent, onRestart }) {
   const total = answers.length
   const counts = { A: 0, B: 0, C: 0 }
   answers.forEach((a) => {
-    counts[a] = (counts[a] || 0) + 1
+    const choice = typeof a === 'object' ? a.ans : a
+    if (counts[choice] !== undefined) {
+      counts[choice] += 1
+    }
   })
 
   return (
