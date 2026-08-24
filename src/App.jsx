@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
 import quizData from './data/quizData'
-const [userPercent, setUserPercent] = useState(null)
 
 function shuffleArray(array) {
   const shuffled = [...array]
@@ -258,14 +257,14 @@ function ResultPage({ winner, answers, percent, onRestart }) {
             >
               <div>
                 <p className="text-sm font-bold text-slate-500 mb-1">你的測驗結果是</p>
-                <h1 className="text-2xl font-bold text-slate-800 mb-4 whitespace-pre-line">{result.title}</h1>
+                <h1 className="text-2xl font-bold text-slate-800 mb-1 whitespace-pre-line">{result.title}</h1>
 
                 {percent !== null ? (
-                  <div className="inline-block bg-white/90 border border-slate-800 rounded-full px-3 py-1 text-xs font-bold text-slate-700 my-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                    🎉 有 <span className="text-rose-500 font-extrabold">{percent}%</span> 人都係依個結果！
+                  <div className="inline-block bg-[#F3E9DC] border-2 border-slate-800 rounded-full px-4 py-1.5 text-sm md:text-base font-bold text-slate-800 mt-0 mb-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    🎉 有 <span className="text-[#C85A32] font-extrabold text-base md:text-lg">{percent}%</span> 人都係依個結果！
                   </div>
                 ) : (
-                  <div className="text-xs text-slate-400 my-1 font-bold">正在計算全網同款人格比例...</div>
+                  <div className="text-sm text-slate-600 mt-0 mb-1 font-bold">正在計算全網同款人格比例...</div>
                 )}
 
 
@@ -375,6 +374,7 @@ export default function App() {
   const [phase, setPhase] = useState('landing')
   const [resultData, setResultData] = useState(null)
   const [shuffledQuestions, setShuffledQuestions] = useState([])
+  const [userPercent, setUserPercent] = useState(null)
 
   const handleStart = useCallback(() => {
 
