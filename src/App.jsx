@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import quizData from './data/quizData'
 
-// 隨機打亂陣列的函式
 function shuffleArray(array) {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -61,7 +60,6 @@ function LandingPage({ onStart }) {
           </button>
         </div>
 
-        {/* 右側：純圖片顯示 */}
         <div className="flex-1 w-full flex justify-center">
           <img
             src={quizData.landing.heroImage}
@@ -87,7 +85,6 @@ function QuizPage({ questions, onResult }) {
   const total = questions.length
   const question = questions[current]
 
-  // 新增：當題目改變時，自動隨機打亂當前題目的選項
   const shuffledOptions = useMemo(() => {
     if (!question || !question.options) return []
     return shuffleArray(question.options)
@@ -107,8 +104,7 @@ function QuizPage({ questions, onResult }) {
 const selectOption = useCallback(
     (optionId) => {
       if (animating) return
-      
-      // 修改點：根據當前題目索引 (current) 覆蓋答案，而不是盲目 push 附加在最後
+
       const newAnswers = [...answers]
       newAnswers[current] = optionId
       setAnswers(newAnswers)
@@ -126,18 +122,14 @@ const selectOption = useCallback(
             if (counts[a] !== undefined) counts[a] += 1
           })
 
-          // 1. 找出最高得分是多少
           const maxScore = Math.max(...Object.values(counts))
 
-          // 2. 找出所有達到最高分的選項（例如同分為 ['A', 'B']）
           const topKeys = Object.keys(counts)
             .filter((k) => counts[k] === maxScore)
-            .sort() // 確保順序是 A -> B -> C
+            .sort()
 
-          // 3. 把最高分的字母拼起來，例如 'A', 'AB', 'AC', 'BC', 'ABC'
           let winnerKey = topKeys.join('')
 
-          // 4. 安全保護：如果 quizData.results 裡面沒有定義這個組合，就退回第一個單一角色
           if (!quizData.results[winnerKey]) {
             winnerKey = topKeys[0]
           }
@@ -207,7 +199,6 @@ const selectOption = useCallback(
           </div>
 
           <div className="flex flex-col gap-3">
-            {/* 修改：渲染打亂後的 shuffledOptions，但標籤顯示 A, B, C */}
             {shuffledOptions.map((opt, idx) => {
               const label = String.fromCharCode(65 + idx)
               return (
@@ -244,8 +235,7 @@ function ResultPage({ winner, answers, onRestart }) {
 
   return (
     <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 pb-10 pt-20 md:pt-24">
-      
-      {/* 頂部 Logo */}
+    
       <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
         <img
           src="/images/hkpa_logo.png"
@@ -258,11 +248,9 @@ function ResultPage({ winner, answers, onRestart }) {
       </div>
 
       <div className="w-full max-w-4xl flex flex-col gap-6">
-        
-        {/* 1. 上方：雙欄主要內容區域 (左欄 + 右欄) */}
+
         <div className="w-full flex flex-col md:flex-row items-stretch gap-6">
-          
-          {/* 左欄：結果卡片 */}
+
           <div className="w-full md:w-1/2 flex flex-col">
             <div
               className={`${result.color} border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-6 text-center h-full flex flex-col justify-between`}
@@ -289,7 +277,6 @@ function ResultPage({ winner, answers, onRestart }) {
             </div>
           </div>
 
-          {/* 右欄：性格特質 + 選擇分佈 + 再測一次按鈕 */}
           <div className="w-full md:w-1/2 flex flex-col justify-between gap-4">
             <div className="bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-5">
               <p className="text-xs font-bold text-slate-500 mb-3">性格特質</p>
@@ -337,7 +324,6 @@ function ResultPage({ winner, answers, onRestart }) {
 
         </div>
 
-        {/* 2. 下方：跨滿全寬的 IG 追蹤區塊 */}
         <div className="w-full bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-4 flex flex-col md:flex-row items-start justify-between gap-3">
           
           <div className="flex items-center gap-4">
@@ -380,7 +366,7 @@ export default function App() {
   const [shuffledQuestions, setShuffledQuestions] = useState([])
 
   const handleStart = useCallback(() => {
-    // 每次開始測驗時，重新隨機打亂題目順序
+
     setShuffledQuestions(shuffleArray(quizData.questions))
     setPhase('quiz')
   }, [])

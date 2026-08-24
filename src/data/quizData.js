@@ -13,10 +13,10 @@ const quizData = {
     startButtonText: "開始認識自己 →",
     subHint: "完全匿名 · 輕鬆玩",
     
-    // 更新這裡的圖片路徑：
+
     heroImage: "/images/homepage.png",
     
-    // 底部三個角色小卡片
+
     characters: [
       { id: 'A', name: '呀慈', tag: '熱情派', avatar: '/images/char-orange.png', image: '/images/imgtsz.png', color: 'bg-pink-200' },
       { id: 'B', name: '呀雲', tag: '溫柔派', avatar: '/images/char-blue.png', image: '/images/imgwan.png', color: 'bg-blue-200' },
@@ -24,7 +24,7 @@ const quizData = {
     ],
   },
 
-  // 2. 測驗題目 (共 10 題)
+
   questions: [
     {
       id: 1,
@@ -118,7 +118,7 @@ const quizData = {
     },
   ],
 
-  // 3. 測驗結果 (A/B/C 三種角色分析)
+
   results: {
     A: {
       name: '呀慈',

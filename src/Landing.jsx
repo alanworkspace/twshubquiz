@@ -6,8 +6,7 @@ export default function App() {
   const [started, setStarted] = useState(false);
   const { landing } = quizData;
 
-  // 如果點擊了開始按鈕（這裡可後續銜接題目頁面）
-  if (started) {
+   if (started) {
     return (
       <div className="min-h-screen bg-[#FFFDF8] flex items-center justify-center p-4">
         <h2 className="text-2xl font-bold">進入測驗題目頁面...</h2>
@@ -19,7 +18,7 @@ export default function App() {
     <div className="min-h-screen bg-[#FFFDF8] flex items-center justify-center p-4 md:p-8 text-[#2D3748]">
       <div className="max-w-5xl w-full flex flex-col md:flex-row items-center gap-8 md:gap-12">
         
-        {/* 左側：所有文字內容、按鈕與角色標籤 */}
+
         <div className="flex-1 space-y-6 text-left">
           <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm font-medium">
             <span className="bg-[#FFEAD2] text-[#D97706] px-3 py-1 rounded-full border border-[#F59E0B]">
@@ -67,7 +66,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* 右側：獨立顯示的圖片卡片 */}
+
         <div className="flex-1 w-full max-w-md md:max-w-none flex justify-center">
           <div className="bg-white p-4 md:p-6 rounded-3xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] w-full">
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-[#FFFDF8]">
