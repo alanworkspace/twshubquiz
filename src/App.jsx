@@ -1,5 +1,96 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import quizData from './data/quizData'
+import { pickPrize, TICKET_REWARD_SCORE, scoreToPoints } from './data/lotteryData'
+import Navbar from './Navbar'
+import CatchGamePage from './CatchGamePage'
+import SnackCirclePage from './SnackCirclePage'
+import LotteryShopPage from './LotteryShopPage'
+import MemberPage from './MemberPage'
+
+const ACCOUNTS_KEY = 'member_accounts'
+const SESSION_KEY = 'member_session'
+const TAG_BY_LETTER = { A: '直覺派', B: '感覺派', C: '思考派' }
+const QUIZ_REWARD_POINTS = 50
+
+function mondayOf(d) {
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const day = (date.getDay() + 6) % 7
+  date.setDate(date.getDate() - day)
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${mm}-${dd}`
+}
+
+function defaultMemberData() {
+  return {
+    nickname: '',
+    password: '',
+    avatar: '',
+    points: 0,
+    tickets: 0,
+    history: [],
+    coupons: [],
+    activity: [],
+    highScore: 0,
+    lastQuizRewardWeek: '',
+    createdAt: new Date().toISOString(),
+  }
+}
+
+function loadAccounts() {
+  try {
+    const raw = localStorage.getItem(ACCOUNTS_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch (err) {
+    console.error('載入帳戶資料失敗', err)
+  }
+  return {}
+}
+
+function saveAccounts(accounts) {
+  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts))
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    return typeof data?.nickname === 'string' ? data.nickname : null
+  } catch (err) {
+    return null
+  }
+}
+
+function saveSession(nickname) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ nickname }))
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY)
+}
+
+function buildHistoryEntry(winner, answers, rewarded) {
+  const counts = { A: 0, B: 0, C: 0 }
+  answers.forEach((a) => {
+    const choice = typeof a === 'object' ? a.ans : a
+    if (counts[choice] !== undefined) counts[choice] += 1
+  })
+  const maxScore = Math.max(0, ...Object.values(counts))
+  const topKeys = Object.keys(counts).filter((k) => counts[k] === maxScore && counts[k] > 0)
+  const single = topKeys.length === 1 ? topKeys[0] : null
+  const result = quizData.results[winner]
+  const charName = result?.name?.split(' - ')?.[0]?.trim() || winner
+  return {
+    id: Date.now(),
+    winner,
+    charName,
+    tag: single ? TAG_BY_LETTER[single] : null,
+    title: result?.title || result?.name || winner,
+    at: new Date().toLocaleDateString('zh-HK'),
+    rewarded: !!rewarded,
+  }
+}
 
 function shuffleArray(array) {
   const shuffled = [...array]
@@ -13,16 +104,7 @@ function shuffleArray(array) {
 function LandingPage({ onStart }) {
   return (
     <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 py-10 pt-20 md:pt-24">
-      <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
-        <img
-          src="/images/hkpa_logo.png"
-          alt="HKPA Logo"
-          className="h-10 md:h-14 w-auto object-contain"
-          onError={(e) => {
-            e.target.style.display = 'none'
-          }}
-        />
-      </div>
+      
       <div className="w-full max-w-4xl flex flex-col md:flex-row items-center gap-8">
         <div className="flex-[1.3] space-y-6 w-full">
           <div className="bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-6 md:p-8">
@@ -146,16 +228,7 @@ const selectOption = useCallback(
 
   return (
     <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 py-10 pt-20 md:pt-24">
-      <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
-        <img
-          src="/images/hkpa_logo.png"
-          alt="HKPA Logo"
-          className="h-10 md:h-14 w-auto object-contain"
-          onError={(e) => {
-            e.target.style.display = 'none'
-          }}
-        />
-      </div>
+      
       <div className="w-full max-w-2xl">
         <div className="flex items-center justify-between mb-2">
           <button
@@ -240,16 +313,7 @@ function ResultPage({ winner, answers, percent, onRestart }) {
   return (
     <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-[url('/images/mobile.png')] md:bg-[url('/images/comp.png')] flex flex-col items-center justify-center px-4 pb-10 pt-20 md:pt-24">
     
-      <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
-        <img
-          src="/images/hkpa_logo.png"
-          alt="HKPA Logo"
-          className="h-10 md:h-14 w-auto object-contain"
-          onError={(e) => {
-            e.target.style.display = 'none'
-          }}
-        />
-      </div>
+      
 
       <div className="w-full max-w-4xl flex flex-col gap-6">
 
@@ -375,59 +439,265 @@ function ResultPage({ winner, answers, percent, onRestart }) {
   )
 }
 export default function App() {
+  const [page, setPage] = useState('quiz')
   const [phase, setPhase] = useState('landing')
   const [resultData, setResultData] = useState(null)
   const [shuffledQuestions, setShuffledQuestions] = useState([])
   const [userPercent, setUserPercent] = useState(null)
 
-  const handleStart = useCallback(() => {
+  const [accounts, setAccounts] = useState(() => loadAccounts())
+  const [currentUser, setCurrentUser] = useState(() => loadSession())
+  const accountsRef = useRef(accounts)
+  accountsRef.current = accounts
+  const currentUserRef = useRef(currentUser)
+  currentUserRef.current = currentUser
 
+  const member = currentUser ? accounts[currentUser] || null : null
+
+  const commitMember = useCallback((next) => {
+    const user = currentUserRef.current
+    if (!user) return
+    const prev = accountsRef.current
+    const updated = { ...prev, [user]: next }
+    saveAccounts(updated)
+    setAccounts(updated)
+  }, [])
+
+  const prependActivity = (activity, note) => {
+    const at = new Date().toLocaleDateString('zh-HK')
+    return [{ id: Date.now(), text: note, at }, ...(activity || [])].slice(0, 30)
+  }
+
+  const handleRegister = useCallback((nickname, password) => {
+    const name = nickname.trim()
+    if (!name || !password) return '請輸入暱稱同密碼'
+    if (accountsRef.current[name]) return '呢個暱稱已經有人用咗，換一個啦'
+    const updated = {
+      ...accountsRef.current,
+      [name]: { ...defaultMemberData(), password, nickname: name },
+    }
+    setAccounts(updated)
+    saveAccounts(updated)
+    setCurrentUser(name)
+    saveSession(name)
+    return null
+  }, [])
+
+  const handleLogin = useCallback((nickname, password) => {
+    const name = nickname.trim()
+    if (!name || !password) return '請輸入暱稱同密碼'
+    const acc = accountsRef.current[name]
+    if (!acc) return '搵唔到呢個會員，要唔要註冊一個先？'
+    if (acc.password !== password) return '密碼唔啱，再試多次啦'
+    setCurrentUser(name)
+    saveSession(name)
+    return null
+  }, [])
+
+  const handleLogout = useCallback(() => {
+    clearSession()
+    setCurrentUser(null)
+  }, [])
+
+  const handleStart = useCallback(() => {
     setShuffledQuestions(shuffleArray(quizData.questions))
     setPhase('quiz')
   }, [])
 
-  const handleResult = useCallback((winner, answers) => {
-  setResultData({ winner, answers })
-  setPhase('result')
+  const handleResult = useCallback(
+    (winner, answers) => {
+      setResultData({ winner, answers })
+      setPhase('result')
 
-  // 抓取網址上的 source 標籤（預設為 public）
-  const urlParams = new URLSearchParams(window.location.search)
-  const sourceType = urlParams.get('source') || 'public'
+      // 抓取網址上的 source 標籤（預設為 public）
+      const urlParams = new URLSearchParams(window.location.search)
+      const sourceType = urlParams.get('source') || 'public'
 
-  // 發送資料給 Google Sheets 並取得百分比
-  fetch('https://script.google.com/macros/s/AKfycbxtpAId89am0-Wo1nnq0sg0bRVsCqkK3pptWzxuwuYYTJw58FrPXR22hLCZJZDix-TD/exec', { // 👈 貼上你剛複製的 Apps Script URL
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ winner, answers, sourceType })
+      // 發送資料給 Google Sheets 並取得百分比
+      fetch('https://script.google.com/macros/s/AKfycbxtpAId89am0-Wo1nnq0sg0bRVsCqkK3pptWzxuwuYYTJw58FrPXR22hLCZJZDix-TD/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ winner, answers, sourceType })
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.percent !== undefined) {
+            setUserPercent(data.percent)
+          }
+        })
+        .catch((err) => console.error('Error fetching stats:', err))
+
+      // 已登入會員先會記錄結果並獎勵積分（每週只發一次 50 分）
+      const user = currentUserRef.current
+      if (!user) return
+      const current = accountsRef.current[user] || defaultMemberData()
+      const weekKey = mondayOf(new Date())
+      const alreadyClaimed = current.lastQuizRewardWeek === weekKey
+      const rewarded = !alreadyClaimed
+      const entry = buildHistoryEntry(winner, answers, rewarded)
+      commitMember({
+        ...current,
+        points: current.points + (rewarded ? QUIZ_REWARD_POINTS : 0),
+        lastQuizRewardWeek: rewarded ? weekKey : current.lastQuizRewardWeek,
+        history: [entry, ...current.history].slice(0, 20),
+        activity: prependActivity(
+          current.activity,
+          rewarded
+            ? `完成心理測驗：${entry.charName} +${QUIZ_REWARD_POINTS} 分（本週第一次）`
+            : `完成心理測驗：${entry.charName} +0 分（本週已領取過測驗獎勵）`
+        ),
+      })
+    },
+    [commitMember]
+  )
+
+  const handleCatchGameEnd = useCallback(
+    (score) => {
+      const user = currentUserRef.current
+      if (!user) return { ok: false }
+      const current = accountsRef.current[user] || defaultMemberData()
+      const rawScore = Math.max(0, score || 0)
+      const points = scoreToPoints(rawScore)
+      const gainedTicket = rawScore >= TICKET_REWARD_SCORE
+      commitMember({
+        ...current,
+        points: current.points + points,
+        highScore: Math.max(current.highScore || 0, rawScore),
+        tickets: (current.tickets || 0) + (gainedTicket ? 1 : 0),
+        activity: prependActivity(
+          current.activity,
+          gainedTicket
+            ? `完成「救救慈雲山」得分 ${rawScore}（+${points} 🪙），獎賞 1 張抽獎券 🎟️`
+            : `完成「救救慈雲山」遊戲，得分 ${rawScore} 換成 ${points} 🪙`
+        ),
+      })
+      return { ok: true, gainedTicket, points }
+    },
+    [commitMember]
+  )
+
+  const couponRecord = (item, code, note) => ({
+    id: Date.now(),
+    emoji: item.emoji,
+    title: item.name,
+    desc: `${item.desc}${note ? `（${note}）` : ''}`,
+    date: new Date().toLocaleDateString('zh-HK'),
+    code,
   })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data && data.percent !== undefined) {
-        setUserPercent(data.percent) // 儲存回傳的百分比
-      }
-    })
-    .catch((err) => console.error('Error fetching stats:', err))
-}, [])
+
+  const handleDraw = useCallback(
+    () => {
+      const user = currentUserRef.current
+      if (!user) return null
+      const current = accountsRef.current[user]
+      if (!current || (current.tickets || 0) < 1) return null
+      const prize = pickPrize()
+      commitMember({
+        ...current,
+        tickets: (current.tickets || 0) - 1,
+        coupons: [
+          couponRecord(prize, `LOT-${prize.id}`),
+          ...current.coupons,
+        ].slice(0, 30),
+        activity: prependActivity(current.activity, `抽獎抽中：${prize.name} ✨`),
+      })
+      return prize
+    },
+    [commitMember]
+  )
+
+  const handleRedeemPrize = useCallback(
+    (prize) => {
+      const user = currentUserRef.current
+      if (!user) return false
+      const current = accountsRef.current[user]
+      if (!current || current.points < prize.points) return false
+      commitMember({
+        ...current,
+        points: current.points - prize.points,
+        coupons: [
+          couponRecord(prize, `RED-${prize.id}`, '保底兌換'),
+          ...current.coupons,
+        ].slice(0, 30),
+        activity: prependActivity(current.activity, `用積分兌換咗 ${prize.name}（-${prize.points} 分）`),
+      })
+      return true
+    },
+    [commitMember]
+  )
+
+  const handleUpdateAvatar = useCallback(
+    (avatar) => {
+      const user = currentUserRef.current
+      if (!user) return
+      const current = accountsRef.current[user] || defaultMemberData()
+      commitMember({
+        ...current,
+        avatar,
+        activity: prependActivity(current.activity, '更新咗會員頭像 ✏️'),
+      })
+    },
+    [commitMember]
+  )
 
   const handleRestart = useCallback(() => {
     setResultData(null)
     setPhase('landing')
   }, [])
 
-  if (phase === 'landing') return <LandingPage onStart={handleStart} />
-  if (phase === 'quiz')
-    return (
-      <QuizPage
-        questions={shuffledQuestions}
-        onResult={handleResult}
-      />
-    )
   return (
-    <ResultPage
-      winner={resultData.winner}
-      answers={resultData.answers}
-      percent={userPercent}
-      onRestart={handleRestart}
-    />
+    <div className="min-h-screen">
+      <Navbar currentPage={page} onNavigate={setPage} memberName={currentUser} points={member?.points || 0} />
+
+      {page === 'game' && (
+        <CatchGamePage
+          highScore={member?.highScore || 0}
+          isLoggedIn={!!currentUser}
+          onGameEnd={handleCatchGameEnd}
+          onNavigate={setPage}
+        />
+      )}
+
+      {page === 'circle' && <SnackCirclePage />}
+
+      {page === 'lottery' && (
+        <LotteryShopPage
+          isLoggedIn={!!currentUser}
+          member={member}
+          onDraw={handleDraw}
+          onRedeemPrize={handleRedeemPrize}
+          onNavigate={setPage}
+        />
+      )}
+
+      {page === 'member' && (
+        <MemberPage
+          isLoggedIn={!!currentUser}
+          member={member}
+          onLogin={handleLogin}
+          onRegister={handleRegister}
+          onLogout={handleLogout}
+          onUpdateAvatar={handleUpdateAvatar}
+          onNavigate={setPage}
+        />
+      )}
+
+      {page === 'quiz' && (
+        <>
+          {phase === 'landing' && <LandingPage onStart={handleStart} />}
+          {phase === 'quiz' && (
+            <QuizPage questions={shuffledQuestions} onResult={handleResult} />
+          )}
+          {phase === 'result' && resultData && (
+            <ResultPage
+              winner={resultData.winner}
+              answers={resultData.answers}
+              percent={userPercent}
+              onRestart={handleRestart}
+            />
+          )}
+        </>
+      )}
+    </div>
   )
 }
